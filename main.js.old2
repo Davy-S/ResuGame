@@ -1,0 +1,153 @@
+var canvas = document.querySelector('canvas');
+var ctx = canvas.getContext('2d');
+
+// Variables
+var width = 800;
+var height = 500;
+canvas.width = width;
+canvas.height = height;
+var isLeft = false;
+var isRight = false;
+var isSpace = false;
+var maxBlock = 3;
+
+//Objects
+var player = new Object("./img/Characters/1/Walk/1.png", 100, 100, 60, 60);
+player.Velocity_Y = 3;
+player.Gravity = 20;
+player.Weight = 0.1;
+
+var block = new Array();
+for(var i = 0; i <= 2; i++) {
+  block[i] = new Object("./img/OtherAssets/ground01.png", i*32+100, 300, 32, 32)
+}
+
+block[0] = new Object("./img/OtherAssets/ground01.png", 100, 450, 80, 80);
+
+
+
+var backG = new Object("./img/Backgrounds/1.png", 0, 0, canvas.width, canvas.height)
+
+// EVENTS 37 LEFT - 39 RIGHT - 32 SPACE
+window.onkeydown = function(event) {
+  var code = event.keyCode;
+
+  if(code === 37) {
+    isLeft = true;
+
+  }
+  if(code === 39) {
+    isRight = true;
+
+  }
+  if(code === 32) {
+    isSpace = true;
+
+  }
+}
+window.onkeyup = function(event) {
+  var code = event.keyCode;
+
+  if(code === 37) {
+    isLeft = false;
+
+  }
+  if(code === 39) {
+    isRight = false;
+  }
+  if(code === 32) {
+    isSpace = false;
+  }
+}
+
+//Game Loop
+function draw() {
+
+  player.X += player.Velocity_X;
+  player.Y += player.Velocity_Y;
+
+  if(isLeft) {
+    player.Velocity_X = -3;
+  }
+  if(isRight) {
+    player.Velocity_X = 3;
+  }
+  if(!isLeft && !isRight) {
+    player.Velocity_X = 0;
+  }
+  if(player.Velocity_Y < player.Gravity) {
+    player.Velocity_Y += player.Weight;
+  }
+  for(var i = 0; i <= maxBlock; i++) {
+    if(player.isColliding(block[i]) && player.Y + player.Height < block[i].Y + player.Velocity_Y) {
+      player.Y = block[i].Y - player.Height;
+      player.Velocity_Y = 0;
+    }
+  }
+
+
+  if(isSpace && player.Velocity_Y === 0) {
+    player.Velocity_Y = -5;
+
+  }
+
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.drawImage(backG.Sprite, backG.X, backG.Y, backG.Width, backG.Height);
+
+  ctx.drawImage(player.Sprite, player.X, player.Y, player.Width, player.Height);
+  // console.log("X " + player.X)
+
+  for(var i = 0; i <= maxBlock; i++) {
+    ctx.drawImage(block[i].Sprite, block[i].X, block[i].Y, block[i].Width, block[i].Height);
+  }
+
+  //Refresh
+  requestAnimationFrame(draw);
+};
+
+
+//Object Constructor
+function Object(img, x, y, width, height) {
+  this.Sprite = new Image();
+  this.Sprite.src = img;
+  this.X = x;
+  this.Y = y;
+  this.Width = width;
+  this.Height = height;
+  this.Previous_X;
+  this.Previous_Y;
+  this.Velocity_X = 0;
+  this.Velocity_Y = 0;
+  this.Gravity = 0;
+  this.Weight = 0;
+
+  // Collision Check
+  this.isColliding = function(obj) {
+
+    if(this.X > obj.X + obj.Width) {
+      return false;
+    }
+
+    if(this.X + this.Width < obj.X ) {
+      return false;
+    }
+
+    if(this.Y > obj.Y + obj.Height) {
+      return false;
+    }
+
+    if(this.Y + this.Height < obj.Y) {
+      return false;
+
+    } else {
+      return true;
+
+    }
+
+  }
+
+}
+
+draw();
