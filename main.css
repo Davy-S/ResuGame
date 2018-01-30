@@ -2,3 +2,6 @@ canvas {
   display: block;
   margin: 0 auto;
 }
+body {
+  background-image: url(./img/Backgrounds/2.png);
+}
